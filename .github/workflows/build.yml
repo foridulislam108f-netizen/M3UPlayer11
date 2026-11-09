@@ -5,7 +5,7 @@
 {"name": "Find project", "run": "Z=$(ls *.zip 2>/dev/null | head -1 || true)\nif [ -n \"$Z\" ]; then mkdir -p _p && unzip -q -o \"$Z\" -d _p; fi\nF=$(find . -name settings.gradle.kts -not -path \"./.git/*\" | head -1)\necho \"PROJECT_DIR=$(dirname \"$F\")\" >> $GITHUB_ENV"},
 {"uses": "actions/setup-java@v4", "with": {"distribution": "temurin", "java-version": "17"}},
 {"uses": "gradle/actions/setup-gradle@v3", "with": {"gradle-version": "8.11.1"}},
-{"name": "Build debug APK", "run": "cd \"$PROJECT_DIR\"\ngradle assembleDebug --console=plain 2>&1 | tee \"$GITHUB_WORKSPACE/build.log\""},
-{"name": "Show the real error", "if": "failure()", "run": "(echo '## Build error'; echo '~~~'; grep -n -E '^e: |error:|AAPT|What went wrong|Could not resolve|Execution failed|Caused by' -A6 build.log | head -80; echo '~~~') >> $GITHUB_STEP_SUMMARY"},
+{"name": "Build debug APK", "run": "set -o pipefail\ncd \"$PROJECT_DIR\"\ngradle assembleDebug --console=plain 2>&1 | tee \"$GITHUB_WORKSPACE/build.log\""},
+{"name": "Show the real error", "if": "always()", "run": "(echo '## Build error'; echo '~~~'; grep -n -E '^e: |error:|AAPT|What went wrong|Could not resolve|Execution failed|Caused by' -A6 build.log | head -80; echo '~~~') >> $GITHUB_STEP_SUMMARY"},
 {"uses": "actions/upload-artifact@v4", "with": {"name": "M3UPlayer-APK", "path": "${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk"}}
 ]}}}
